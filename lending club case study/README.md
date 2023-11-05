@@ -61,4 +61,8 @@ The Target column of interest is loan_status and the interested sample space is 
 - Step 5 - Filtering the rows based on Domain and problemstatement understanding
 - Step 6 - Outlier Treatment
 - Step 7 - **Analysis** - Univariate, Bivariate, multi-variate and Derived Metrics Analysis
-- Step 8 - **Conclusions** Observations and recommendations 
+- Step 8 - **Conclusions** Observations and recommendations
+
+
+## Contact
+Created by @pradyrk - feel free to contact me!
