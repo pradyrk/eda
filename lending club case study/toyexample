@@ -1,0 +1,34 @@
+import pandas as pd
+import re
+
+# Sample dataframe
+data = {'paragraph': ["This is a text with 123 numbers.",
+                      "Only text here.",
+                      "More text 4567.",
+                      "789 text at the end.",
+                      "Text and numbers 1, 2, 3"]}
+df = pd.DataFrame(data)
+
+# Function to calculate the text-to-numeric ratio
+def calculate_text_vs_numeric_ratio(text):
+    # Count the number of letters (text)
+    text_count = len(re.findall(r'[a-zA-Z]', text))
+    # Count the number of digits (numeric data)
+    num_count = len(re.findall(r'\d', text))
+    
+    # Avoid division by zero
+    if text_count + num_count == 0:
+        return 0, 0
+    
+    # Calculate proportions
+    total_count = text_count + num_count
+    text_ratio = text_count / total_count
+    num_ratio = num_count / total_count
+    
+    return text_ratio, num_ratio
+
+# Apply the function to each row in the 'paragraph' column
+df[['text_ratio', 'num_ratio']] = df['paragraph'].apply(lambda x: pd.Series(calculate_text_vs_numeric_ratio(x)))
+
+# Show the result
+print(df)
