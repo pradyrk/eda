@@ -1,34 +1,51 @@
 import pandas as pd
-import re
 
-# Sample dataframe
-data = {'paragraph': ["This is a text with 123 numbers.",
-                      "Only text here.",
-                      "More text 4567.",
-                      "789 text at the end.",
-                      "Text and numbers 1, 2, 3"]}
-df = pd.DataFrame(data)
-
-# Function to calculate the text-to-numeric ratio
-def calculate_text_vs_numeric_ratio(text):
-    # Count the number of letters (text)
-    text_count = len(re.findall(r'[a-zA-Z]', text))
-    # Count the number of digits (numeric data)
-    num_count = len(re.findall(r'\d', text))
+# Function to calculate mean of columns with specific suffixes
+def compute_means(dataframes):
+    result = {}
     
-    # Avoid division by zero
-    if text_count + num_count == 0:
-        return 0, 0
+    for df in dataframes:
+        # Identifying the columns with 'text_ratio' and 'num_ratio' suffixes
+        text_columns = [col for col in df.columns if col.endswith('text_ratio')]
+        num_columns = [col for col in df.columns if col.endswith('num_ratio')]
+        
+        # Dictionary to store the means of 'text_ratio' and 'num_ratio' columns
+        mean_values = {}
+        
+        # Calculate means for 'text_ratio' and 'num_ratio' columns
+        for col in text_columns:
+            mean_values[col] = df[col].mean()
+        for col in num_columns:
+            mean_values[col] = df[col].mean()
+        
+        # Add the dataframe and its mean values to the result dictionary
+        result[df] = mean_values
     
-    # Calculate proportions
-    total_count = text_count + num_count
-    text_ratio = text_count / total_count
-    num_ratio = num_count / total_count
-    
-    return text_ratio, num_ratio
+    return result
 
-# Apply the function to each row in the 'paragraph' column
-df[['text_ratio', 'num_ratio']] = df['paragraph'].apply(lambda x: pd.Series(calculate_text_vs_numeric_ratio(x)))
+# Example usage:
 
-# Show the result
-print(df)
+# Create a list of dataframes for testing
+df1 = pd.DataFrame({
+    'col1_text_ratio': [0.1, 0.2, 0.3],
+    'col2_text_ratio': [0.4, 0.5, 0.6],
+    'col1_num_ratio': [1, 2, 3],
+    'col2_num_ratio': [4, 5, 6]
+})
+
+df2 = pd.DataFrame({
+    'col1_text_ratio': [0.7, 0.8, 0.9],
+    'col2_text_ratio': [0.1, 0.2, 0.3],
+    'col1_num_ratio': [7, 8, 9],
+    'col2_num_ratio': [10, 11, 12]
+})
+
+# List of dataframes
+dataframes = [df1, df2]
+
+# Call the function
+result = compute_means(dataframes)
+
+# Output the result
+for df, mean_dict in result.items():
+    print(f"DataFrame:\n{df}\nMeans:\n{mean_dict}\n")
