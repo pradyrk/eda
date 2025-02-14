@@ -1,51 +1,40 @@
-import pandas as pd
+from io import BytesIO
+from pptx import Presentation
 
-# Function to calculate mean of columns with specific suffixes
-def compute_means(dataframes):
-    result = {}
+def pptx_to_bytes(file_path: str) -> bytes:
+    """
+    Reads a .pptx file from the given path and converts it to bytes.
     
-    for df in dataframes:
-        # Identifying the columns with 'text_ratio' and 'num_ratio' suffixes
-        text_columns = [col for col in df.columns if col.endswith('text_ratio')]
-        num_columns = [col for col in df.columns if col.endswith('num_ratio')]
-        
-        # Dictionary to store the means of 'text_ratio' and 'num_ratio' columns
-        mean_values = {}
-        
-        # Calculate means for 'text_ratio' and 'num_ratio' columns
-        for col in text_columns:
-            mean_values[col] = df[col].mean()
-        for col in num_columns:
-            mean_values[col] = df[col].mean()
-        
-        # Add the dataframe and its mean values to the result dictionary
-        result[df] = mean_values
+    :param file_path: Path to the .pptx file
+    :return: The .pptx file content in byte format
+    """
+    # Open the pptx file and read it into a memory buffer (BytesIO)
+    with open(file_path, 'rb') as pptx_file:
+        pptx_bytes = pptx_file.read()
     
-    return result
+    return pptx_bytes
 
 # Example usage:
+pptx_bytes = pptx_to_bytes('path_to_your_pptx_file.pptx')
+print(type(pptx_bytes))  # It will print: <class 'bytes'>
 
-# Create a list of dataframes for testing
-df1 = pd.DataFrame({
-    'col1_text_ratio': [0.1, 0.2, 0.3],
-    'col2_text_ratio': [0.4, 0.5, 0.6],
-    'col1_num_ratio': [1, 2, 3],
-    'col2_num_ratio': [4, 5, 6]
-})
 
-df2 = pd.DataFrame({
-    'col1_text_ratio': [0.7, 0.8, 0.9],
-    'col2_text_ratio': [0.1, 0.2, 0.3],
-    'col1_num_ratio': [7, 8, 9],
-    'col2_num_ratio': [10, 11, 12]
-})
+from io import BytesIO
+from pptx import Presentation
 
-# List of dataframes
-dataframes = [df1, df2]
+def pptx_to_bytes(file_path: str) -> bytes:
+    """
+    Reads a .pptx file from the given path and converts it to bytes.
+    
+    :param file_path: Path to the .pptx file
+    :return: The .pptx file content in byte format
+    """
+    # Open the pptx file and read it into a memory buffer (BytesIO)
+    with open(file_path, 'rb') as pptx_file:
+        pptx_bytes = pptx_file.read()
+    
+    return pptx_bytes
 
-# Call the function
-result = compute_means(dataframes)
-
-# Output the result
-for df, mean_dict in result.items():
-    print(f"DataFrame:\n{df}\nMeans:\n{mean_dict}\n")
+# Example usage:
+pptx_bytes = pptx_to_bytes('path_to_your_pptx_file.pptx')
+print(type(pptx_bytes))  # It will print: <class 'bytes'>
