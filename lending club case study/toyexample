@@ -1,40 +1,30 @@
 from io import BytesIO
 from pptx import Presentation
 
-def pptx_to_bytes(file_path: str) -> bytes:
+def read_pptx_from_bytes(pptx_bytes: bytes) -> Presentation:
     """
-    Reads a .pptx file from the given path and converts it to bytes.
+    Reads a .pptx file from byte data and returns a Presentation object.
     
-    :param file_path: Path to the .pptx file
-    :return: The .pptx file content in byte format
+    :param pptx_bytes: The .pptx file content in byte format
+    :return: A python-pptx Presentation object
     """
-    # Open the pptx file and read it into a memory buffer (BytesIO)
-    with open(file_path, 'rb') as pptx_file:
-        pptx_bytes = pptx_file.read()
+    # Convert bytes to a file-like object using BytesIO
+    pptx_file = BytesIO(pptx_bytes)
     
-    return pptx_bytes
+    # Load the presentation from the file-like object
+    presentation = Presentation(pptx_file)
+    
+    return presentation
 
 # Example usage:
-pptx_bytes = pptx_to_bytes('path_to_your_pptx_file.pptx')
-print(type(pptx_bytes))  # It will print: <class 'bytes'>
+# Assume pptx_bytes is already defined or obtained
+# pptx_bytes = some_method_to_get_bytes()
 
+presentation = read_pptx_from_bytes(pptx_bytes)
 
-from io import BytesIO
-from pptx import Presentation
-
-def pptx_to_bytes(file_path: str) -> bytes:
-    """
-    Reads a .pptx file from the given path and converts it to bytes.
-    
-    :param file_path: Path to the .pptx file
-    :return: The .pptx file content in byte format
-    """
-    # Open the pptx file and read it into a memory buffer (BytesIO)
-    with open(file_path, 'rb') as pptx_file:
-        pptx_bytes = pptx_file.read()
-    
-    return pptx_bytes
-
-# Example usage:
-pptx_bytes = pptx_to_bytes('path_to_your_pptx_file.pptx')
-print(type(pptx_bytes))  # It will print: <class 'bytes'>
+# You can now work with the 'presentation' object, for example:
+for slide in presentation.slides:
+    print(f"Slide {presentation.slides.index(slide) + 1}")
+    for shape in slide.shapes:
+        if hasattr(shape, "text"):
+            print(f"Text: {shape.text}")
