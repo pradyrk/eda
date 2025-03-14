@@ -28,3 +28,7 @@ for slide in presentation.slides:
     for shape in slide.shapes:
         if hasattr(shape, "text"):
             print(f"Text: {shape.text}")
+# Insert an empty row as the new header
+df.columns = pd.MultiIndex.from_tuples([("", col) for col in df.columns])
+
+print(df)
