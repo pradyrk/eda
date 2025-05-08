@@ -1,10 +1,105 @@
-from textwrap import shorten
+from reportlab.lib.pagesizes import letter, landscape
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.platypus import (
+    SimpleDocTemplate,
+    Paragraph,
+    Table,
+    TableStyle,
+    Spacer,
+    KeepTogether
+)
+from reportlab.lib import colors
+from reportlab.lib.units import inch
 
-def truncate_or_wrap(text, max_chars=100):
-    return shorten(text, width=max_chars, placeholder="...")
+# Example: use actual table_dicts from your pipeline
+# table_dicts.extend(extracted_info)
+content = table_dicts
+content = sorted(content, key=lambda x: x['page'])
 
-# Wrap cell content
-table_data = [
-    [Paragraph(truncate_or_wrap(str(cell)), cell_style) for cell in row]
-    for row in item["data"]
-]
+# Create PDF document
+doc = SimpleDocTemplate("dynamic_report_final.pdf", pagesize=landscape(letter))
+elements = []
+
+# Styles
+styles = getSampleStyleSheet()
+header_style = styles['Heading1']
+paragraph_style = styles['BodyText']
+
+table_label_style = ParagraphStyle(
+    'table_label',
+    fontName='Helvetica-Bold',
+    fontSize=11,
+    leading=14,
+    spaceAfter=6
+)
+
+# Smaller style for wrapping in table cells
+cell_style = ParagraphStyle(
+    'table_cell',
+    fontName='Helvetica',
+    fontSize=8,
+    leading=10,
+    spaceBefore=0,
+    spaceAfter=0,
+    wordWrap='CJK',  # Enables better wrapping even without spaces
+)
+
+def clean_cell(cell_content):
+    """Preserve full content and enable wrapping."""
+    if isinstance(cell_content, str):
+        return cell_content.replace('\n', ' ')
+    return str(cell_content)
+
+table_counter = 1
+
+# Build document
+for item in content:
+    if item["type"] == "header":
+        elements.append(Paragraph(item["text"], header_style))
+
+    elif item["type"] == "paragraph":
+        elements.append(Paragraph(item["text"], paragraph_style))
+
+    elif item["type"] == "table":
+        label_text = f"Table {table_counter}: Summary for Page {item.get('page', '?')}"
+        elements.append(Paragraph(label_text, table_label_style))
+        table_counter += 1
+
+        # Prepare table content with full text preserved
+        table_data = [
+            [Paragraph(clean_cell(cell), cell_style) for cell in row]
+            for row in item["data"]
+        ]
+
+        num_cols = len(item["data"][0])
+        usable_width = landscape(letter)[0] - 1.5 * inch
+        col_widths = [usable_width / num_cols] * num_cols
+
+        repeat_row_count = min(5, len(table_data))
+
+        table = Table(table_data, colWidths=col_widths, repeatRows=repeat_row_count)
+
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, repeat_row_count - 1), colors.lightgrey),
+            ('TEXTCOLOR', (0, 0), (-1, repeat_row_count - 1), colors.black),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 8),
+            ('TOPPADDING', (0, 0), (-1, -1), 4),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+            ('LEFTPADDING', (0, 0), (-1, -1), 3),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 3),
+            ('GRID', (0, 0), (-1, -1), 1.2, colors.black),
+        ]))
+
+        # Only wrap small tables in KeepTogether
+        if len(table_data) <= 15:
+            elements.append(KeepTogether(table))
+        else:
+            elements.append(table)
+
+    elements.append(Spacer(1, 12))
+
+# Finalize PDF
+doc.build(elements)
