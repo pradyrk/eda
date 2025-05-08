@@ -1,0 +1,10 @@
+from textwrap import shorten
+
+def truncate_or_wrap(text, max_chars=100):
+    return shorten(text, width=max_chars, placeholder="...")
+
+# Wrap cell content
+table_data = [
+    [Paragraph(truncate_or_wrap(str(cell)), cell_style) for cell in row]
+    for row in item["data"]
+]
